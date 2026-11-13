@@ -1,0 +1,15 @@
+# Keep LF line endings on every OS so Prettier/ESLint agree across
+# Windows, macOS and CI (Linux).
+* text=auto eol=lf
+
+# Windows-only scripts need CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.webp binary
+*.jar binary
