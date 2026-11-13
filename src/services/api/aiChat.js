@@ -8,7 +8,7 @@
 import { httpsCallable } from 'firebase/functions'
 import { functions } from '@/services/firebase'
 
-const aiChatCallable = httpsCallable(functions, 'aiChat', { timeout: 130_000 })
+const aiChatCallable = httpsCallable(functions, 'aiChat', { timeout: 190_000 }) // server limit is 180 s
 
 /**
  * @param {object} input  { conversationId?, message, mode, language, responseLanguage, projectId? }

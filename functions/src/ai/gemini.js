@@ -10,6 +10,7 @@ import { GoogleGenAI } from '@google/genai'
 import { defineSecret } from 'firebase-functions/params'
 import { AI_CONFIG } from '../config.js'
 import { errors } from '../utils/errors.js'
+import { FirstChunkTimeoutError, withFirstChunkTimeout } from '../utils/firstChunkTimeout.js'
 
 export const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY')
 
@@ -39,14 +40,30 @@ export function isMockMode() {
 export async function* streamReply({ systemInstruction, messages, signal, model }) {
   const modelId = AI_CONFIG.allowedModels.includes(model) ? model : AI_CONFIG.defaultModel
 
-  if (isMockMode()) {
-    yield* mockStream(messages.at(-1)?.text ?? '', signal)
-    return
-  }
+  const start = (abortSignal) =>
+    isMockMode()
+      ? mockStream(messages.at(-1)?.text ?? '', abortSignal)
+      : geminiStream({ systemInstruction, messages, modelId, abortSignal })
 
+  try {
+    yield* withFirstChunkTimeout(start, {
+      ms: AI_CONFIG.firstTokenTimeoutMs,
+      parentSignal: signal,
+      isProgress: (part) => Boolean(part.text),
+    })
+  } catch (error) {
+    if (error instanceof FirstChunkTimeoutError) throw errors.aiTooSlow()
+    throw error
+  }
+}
+
+async function* geminiStream({ systemInstruction, messages, modelId, abortSignal }) {
   const ai = getClient()
   if (!ai) throw errors.aiUnavailable() // production without a key: misconfiguration
 
+  // Thinking level stays at the model default: in our tests (Nov 2026) the
+  // LOW/MINIMAL levels often stalled for minutes, while the default reliably
+  // started answering in 4-7 seconds.
   const stream = await ai.models.generateContentStream({
     model: modelId,
     contents: messages.map((m) => ({ role: m.role, parts: [{ text: m.text }] })),
@@ -54,7 +71,7 @@ export async function* streamReply({ systemInstruction, messages, signal, model 
       systemInstruction,
       temperature: AI_CONFIG.temperature,
       maxOutputTokens: AI_CONFIG.maxOutputTokens,
-      abortSignal: signal,
+      abortSignal,
     },
   })
 

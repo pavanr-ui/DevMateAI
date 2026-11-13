@@ -16,8 +16,13 @@ export const AI_CONFIG = {
   historyMessages: 20,
   maxOutputTokens: 8192,
   temperature: 0.4,
-  /** Seconds before a request is cut off. */
-  timeoutSeconds: 120,
+  /**
+   * Give up if the AI hasn't started answering within this time (Gemini
+   * normally starts in 4-7 s; rare queue stalls can last minutes).
+   */
+  firstTokenTimeoutMs: 45_000,
+  /** Hard limit for a whole request, including long answers. */
+  timeoutSeconds: 180,
 }
 
 export const CODE_LANGUAGES = [

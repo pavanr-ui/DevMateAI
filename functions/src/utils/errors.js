@@ -27,6 +27,8 @@ export const errors = {
     ),
   aiUnavailable: () =>
     new HttpsError('unavailable', 'The AI service is busy right now. Please try again shortly.'),
+  aiTooSlow: () =>
+    new HttpsError('unavailable', 'The AI is taking too long to respond. Please try again.'),
   internal: () => new HttpsError('internal', 'Something went wrong. Please try again.'),
 }
 
