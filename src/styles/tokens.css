@@ -1,55 +1,124 @@
 /*
- * Design tokens = named values (colors, radius, fonts) used everywhere.
- * Phase 1 sets up the mechanism with a starter palette.
- * Phase 2 (Design System) refines the full palette and components.
+ * Design tokens = named values (colors, radius, shadows, fonts) used everywhere.
+ * Change a value here and the whole app (Tailwind classes AND Ionic
+ * components) updates.
+ *
+ * Light theme idea: white content cards on a very light background, with a
+ * slightly darker off-white sidebar. Dark theme mirrors the same layering.
  *
  * Flow: --dm-* variables -> Tailwind theme (bg-surface, text-muted, ...)
  *                        -> Ionic variables (--ion-color-primary, ...)
  */
 
 :root {
-  --dm-bg: #f8fafc;
-  --dm-surface: #ffffff;
-  --dm-border: #e2e8f0;
-  --dm-text: #0f172a;
-  --dm-text-muted: #64748b;
-  --dm-primary: #6366f1;
+  /* Surfaces (back to front) */
+  --dm-sidebar: #f4f4f5; /* side panel: slightly darker than content */
+  --dm-bg: #fafafa; /* main content background */
+  --dm-surface: #ffffff; /* cards, inputs, menus */
+  --dm-surface-muted: #f4f4f5; /* hover backgrounds, code blocks, skeletons */
+
+  /* Lines and text */
+  --dm-border: #e4e4e7;
+  --dm-border-strong: #d4d4d8;
+  --dm-text: #18181b;
+  --dm-text-muted: #52525b; /* 7.5:1 on white: readable secondary text */
+  --dm-text-subtle: #71717a; /* 4.8:1 on white: hints, captions */
+
+  /* Brand (indigo-600: 6.3:1 contrast on white, safe for text and buttons) */
+  --dm-primary: #4f46e5;
+  --dm-primary-hover: #4338ca;
+  --dm-primary-soft: #eef2ff; /* active nav item background */
   --dm-primary-contrast: #ffffff;
 
-  /* Hand our colors to Ionic so its components match */
-  --ion-background-color: var(--dm-bg);
-  --ion-text-color: var(--dm-text);
-  --ion-color-primary: var(--dm-primary);
-  --ion-color-primary-contrast: var(--dm-primary-contrast);
-  --ion-font-family: var(--font-sans);
+  /* Status */
+  --dm-danger: #dc2626;
+  --dm-danger-soft: #fef2f2;
+  --dm-success: #16a34a;
+  --dm-success-soft: #f0fdf4;
+  --dm-warning: #b45309;
+  --dm-warning-soft: #fffbeb;
+  --dm-info: #2563eb;
+  --dm-info-soft: #eff6ff;
+
+  --dm-focus-ring: #6366f1;
+  --dm-shadow-sm: 0 1px 2px 0 rgb(24 24 27 / 0.05);
+  --dm-shadow-md: 0 4px 12px -2px rgb(24 24 27 / 0.08), 0 2px 4px -2px rgb(24 24 27 / 0.04);
 }
 
 .ion-palette-dark {
-  --dm-bg: #0b1020;
-  --dm-surface: #121a2e;
-  --dm-border: #1f2a44;
-  --dm-text: #e2e8f0;
-  --dm-text-muted: #94a3b8;
-  --dm-primary: #818cf8;
-  --dm-primary-contrast: #0b1020;
+  --dm-sidebar: #0c0c0f;
+  --dm-bg: #111114;
+  --dm-surface: #18181b;
+  --dm-surface-muted: #222227;
 
-  --ion-background-color: var(--dm-bg);
-  --ion-text-color: var(--dm-text);
-  --ion-color-primary: var(--dm-primary);
-  --ion-color-primary-contrast: var(--dm-primary-contrast);
+  --dm-border: #27272a;
+  --dm-border-strong: #3f3f46;
+  --dm-text: #f4f4f5;
+  --dm-text-muted: #a1a1aa;
+  --dm-text-subtle: #8b8b94;
+
+  --dm-primary: #818cf8;
+  --dm-primary-hover: #a5b4fc;
+  --dm-primary-soft: rgb(129 140 248 / 0.14);
+  --dm-primary-contrast: #111114;
+
+  --dm-danger: #f87171;
+  --dm-danger-soft: rgb(248 113 113 / 0.12);
+  --dm-success: #4ade80;
+  --dm-success-soft: rgb(74 222 128 / 0.12);
+  --dm-warning: #fbbf24;
+  --dm-warning-soft: rgb(251 191 36 / 0.12);
+  --dm-info: #60a5fa;
+  --dm-info-soft: rgb(96 165 250 / 0.12);
+
+  --dm-focus-ring: #a5b4fc;
+  --dm-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --dm-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.5);
 }
 
-/* Expose tokens as Tailwind utilities: bg-bg, bg-surface, text-fg, text-muted,
-   border-line, bg-primary, text-on-primary */
+/* Hand our tokens to Ionic so its components match (both themes) */
+:root,
+.ion-palette-dark {
+  --ion-background-color: var(--dm-bg);
+  --ion-text-color: var(--dm-text);
+  --ion-border-color: var(--dm-border);
+  --ion-color-primary: var(--dm-primary);
+  --ion-color-primary-contrast: var(--dm-primary-contrast);
+  --ion-color-primary-shade: var(--dm-primary-hover);
+  --ion-color-primary-tint: var(--dm-primary-hover);
+  --ion-font-family: var(--font-sans);
+}
+
+/* Expose tokens as Tailwind utilities, e.g. bg-surface, text-muted,
+   border-line, bg-primary, text-on-primary, bg-danger-soft ... */
 @theme inline {
+  --color-sidebar: var(--dm-sidebar);
   --color-bg: var(--dm-bg);
   --color-surface: var(--dm-surface);
+  --color-surface-muted: var(--dm-surface-muted);
   --color-line: var(--dm-border);
+  --color-line-strong: var(--dm-border-strong);
   --color-fg: var(--dm-text);
   --color-muted: var(--dm-text-muted);
+  --color-subtle: var(--dm-text-subtle);
   --color-primary: var(--dm-primary);
+  --color-primary-hover: var(--dm-primary-hover);
+  --color-primary-soft: var(--dm-primary-soft);
   --color-on-primary: var(--dm-primary-contrast);
+  --color-danger: var(--dm-danger);
+  --color-danger-soft: var(--dm-danger-soft);
+  --color-success: var(--dm-success);
+  --color-success-soft: var(--dm-success-soft);
+  --color-warning: var(--dm-warning);
+  --color-warning-soft: var(--dm-warning-soft);
+  --color-info: var(--dm-info);
+  --color-info-soft: var(--dm-info-soft);
+  --color-focus: var(--dm-focus-ring);
 
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --shadow-card: var(--dm-shadow-sm);
+  --shadow-raised: var(--dm-shadow-md);
+
+  --font-sans:
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Consolas, monospace;
 }

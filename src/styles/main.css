@@ -3,11 +3,12 @@
  *
  * Why the @layer order matters:
  * CSS "cascade layers" decide which styles win when two rules clash.
- * Layers listed later win. Putting Ionic BEFORE Tailwind's components and
- * utilities means a Tailwind class like `p-4` can always override Ionic's
- * defaults, while Ionic still styles its own components (tabs, menus...).
+ * Layers listed later win. Ionic goes first, so Tailwind's base reset
+ * (e.g. no default margins on headings) and every Tailwind class like `p-4`
+ * override Ionic's element defaults, while Ionic still styles its own
+ * components (ion-content, outlets, transitions...).
  */
-@layer theme, base, ionic, components, utilities;
+@layer theme, ionic, base, components, utilities;
 
 /* Ionic: only the essentials. We skip Ionic's padding/flex/display utility
    files because Tailwind already provides those. */
@@ -24,3 +25,29 @@
 /* Tailwind's `dark:` variant follows the same class Ionic uses, so a single
    class on <html> switches both systems together. */
 @custom-variant dark (&:where(.ion-palette-dark, .ion-palette-dark *));
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* One consistent, clearly visible keyboard focus ring everywhere */
+  :focus-visible {
+    outline: 2px solid var(--dm-focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* Respect users who turn off animations in their OS settings */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

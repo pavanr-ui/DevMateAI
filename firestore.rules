@@ -1,10 +1,69 @@
 rules_version = '2';
 
-// Phase 1: deny everything by default ("secure by default").
-// Real per-user rules (users/{uid}/...) are added in Phase 2 and hardened
-// in Phase 8, each with automated rules tests in tests/rules/.
+// Firestore security rules.
+// Principle: deny by default, then open exactly what each feature needs.
+// Every rule here is covered by tests in tests/rules/.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // ---------- users/{uid}: profile ----------
+    // Fields a client may write. Anything else is rejected.
+    function profileFields() {
+      return ['displayName', 'email', 'photoURL', 'createdAt', 'updatedAt'];
+    }
+
+    function validDisplayName(data) {
+      return data.displayName is string && data.displayName.size() <= 80;
+    }
+
+    function validPhotoURL(data) {
+      return data.photoURL == null
+        || (data.photoURL is string && data.photoURL.size() <= 2048);
+    }
+
+    function validNewProfile() {
+      let data = incoming();
+      return data.keys().hasOnly(profileFields())
+        && data.keys().hasAll(profileFields())
+        && validDisplayName(data)
+        && validPhotoURL(data)
+        && data.email == request.auth.token.email   // can't claim another email
+        && data.createdAt == request.time            // must use serverTimestamp()
+        && data.updatedAt == request.time;
+    }
+
+    function validProfileUpdate() {
+      let data = incoming();
+      let changed = data.diff(resource.data).affectedKeys();
+      return data.keys().hasOnly(profileFields())
+        && changed.hasOnly(['displayName', 'photoURL', 'updatedAt'])  // email/createdAt locked
+        && validDisplayName(data)
+        && validPhotoURL(data)
+        && data.updatedAt == request.time;
+    }
+
+    match /users/{uid} {
+      allow get: if isOwner(uid);
+      allow list: if false;                          // nobody can list all users
+      allow create: if isOwner(uid) && validNewProfile();
+      allow update: if isOwner(uid) && validProfileUpdate();
+      allow delete: if false;                        // account deletion: backend only (Phase 8)
+    }
+
+    // Everything else stays locked until a feature opens it.
     match /{document=**} {
       allow read, write: if false;
     }
