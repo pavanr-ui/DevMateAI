@@ -1,0 +1,26 @@
+/*
+ * Global stylesheet.
+ *
+ * Why the @layer order matters:
+ * CSS "cascade layers" decide which styles win when two rules clash.
+ * Layers listed later win. Putting Ionic BEFORE Tailwind's components and
+ * utilities means a Tailwind class like `p-4` can always override Ionic's
+ * defaults, while Ionic still styles its own components (tabs, menus...).
+ */
+@layer theme, base, ionic, components, utilities;
+
+/* Ionic: only the essentials. We skip Ionic's padding/flex/display utility
+   files because Tailwind already provides those. */
+@import '@ionic/vue/css/core.css' layer(ionic);
+@import '@ionic/vue/css/normalize.css' layer(ionic);
+@import '@ionic/vue/css/structure.css' layer(ionic);
+@import '@ionic/vue/css/typography.css' layer(ionic);
+/* Dark palette activates when <html> has the class "ion-palette-dark". */
+@import '@ionic/vue/css/palettes/dark.class.css' layer(ionic);
+
+@import 'tailwindcss';
+@import './tokens.css';
+
+/* Tailwind's `dark:` variant follows the same class Ionic uses, so a single
+   class on <html> switches both systems together. */
+@custom-variant dark (&:where(.ion-palette-dark, .ion-palette-dark *));

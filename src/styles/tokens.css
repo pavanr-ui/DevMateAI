@@ -1,0 +1,55 @@
+/*
+ * Design tokens = named values (colors, radius, fonts) used everywhere.
+ * Phase 1 sets up the mechanism with a starter palette.
+ * Phase 2 (Design System) refines the full palette and components.
+ *
+ * Flow: --dm-* variables -> Tailwind theme (bg-surface, text-muted, ...)
+ *                        -> Ionic variables (--ion-color-primary, ...)
+ */
+
+:root {
+  --dm-bg: #f8fafc;
+  --dm-surface: #ffffff;
+  --dm-border: #e2e8f0;
+  --dm-text: #0f172a;
+  --dm-text-muted: #64748b;
+  --dm-primary: #6366f1;
+  --dm-primary-contrast: #ffffff;
+
+  /* Hand our colors to Ionic so its components match */
+  --ion-background-color: var(--dm-bg);
+  --ion-text-color: var(--dm-text);
+  --ion-color-primary: var(--dm-primary);
+  --ion-color-primary-contrast: var(--dm-primary-contrast);
+  --ion-font-family: var(--font-sans);
+}
+
+.ion-palette-dark {
+  --dm-bg: #0b1020;
+  --dm-surface: #121a2e;
+  --dm-border: #1f2a44;
+  --dm-text: #e2e8f0;
+  --dm-text-muted: #94a3b8;
+  --dm-primary: #818cf8;
+  --dm-primary-contrast: #0b1020;
+
+  --ion-background-color: var(--dm-bg);
+  --ion-text-color: var(--dm-text);
+  --ion-color-primary: var(--dm-primary);
+  --ion-color-primary-contrast: var(--dm-primary-contrast);
+}
+
+/* Expose tokens as Tailwind utilities: bg-bg, bg-surface, text-fg, text-muted,
+   border-line, bg-primary, text-on-primary */
+@theme inline {
+  --color-bg: var(--dm-bg);
+  --color-surface: var(--dm-surface);
+  --color-line: var(--dm-border);
+  --color-fg: var(--dm-text);
+  --color-muted: var(--dm-text-muted);
+  --color-primary: var(--dm-primary);
+  --color-on-primary: var(--dm-primary-contrast);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
