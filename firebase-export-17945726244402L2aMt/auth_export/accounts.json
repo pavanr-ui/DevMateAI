@@ -1,0 +1,93 @@
+{
+  "kind": "identitytoolkit#DownloadAccountResponse",
+  "users": [
+    {
+      "localId": "0N2BqmIVim8UGeNtzeQaChCHxPiw",
+      "lastLoginAt": "1794571499742",
+      "emailVerified": false,
+      "email": "test.dev@example.com",
+      "salt": "fakeSaltEwORkA8jYBpciT4ZkEyy",
+      "passwordHash": "fakeHash:salt=fakeSaltEwORkA8jYBpciT4ZkEyy:password=DevMate-test-2026",
+      "passwordUpdatedAt": 1794571425906,
+      "validSince": "1794571425",
+      "createdAt": "1794571425906",
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "test.dev@example.com",
+          "federatedId": "test.dev@example.com",
+          "rawId": "test.dev@example.com",
+          "displayName": "Test Developer"
+        }
+      ],
+      "lastRefreshAt": "2026-11-13T12:04:59.742Z",
+      "displayName": "Test Developer"
+    },
+    {
+      "localId": "CLcugKAkYIp27cjIa2AbHQOjdcNB",
+      "lastLoginAt": "1794572446243",
+      "displayName": "Demo Developer",
+      "emailVerified": false,
+      "email": "demo@devmate.test",
+      "salt": "fakeSalt3sUjcgmhwYK36dZzRyEn",
+      "passwordHash": "fakeHash:salt=fakeSalt3sUjcgmhwYK36dZzRyEn:password=demo-password-123",
+      "passwordUpdatedAt": 1794572354385,
+      "validSince": "1794572354",
+      "createdAt": "1794572354385",
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "demo@devmate.test",
+          "federatedId": "demo@devmate.test",
+          "rawId": "demo@devmate.test",
+          "displayName": "Demo Developer"
+        }
+      ],
+      "lastRefreshAt": "2026-11-13T12:20:46.243Z"
+    },
+    {
+      "localId": "DeNoeSzXuLk3sJg2xANVV7iZtjDG",
+      "lastLoginAt": "1794571888242",
+      "emailVerified": false,
+      "email": "ramshettypavan@gmail.com",
+      "salt": "fakeSalthEffKf5r4roaSLJ3ZrKp",
+      "passwordHash": "fakeHash:salt=fakeSalthEffKf5r4roaSLJ3ZrKp:password=09ag1a1247",
+      "passwordUpdatedAt": 1794571888242,
+      "validSince": "1794571888",
+      "createdAt": "1794571888242",
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "ramshettypavan@gmail.com",
+          "federatedId": "ramshettypavan@gmail.com",
+          "rawId": "ramshettypavan@gmail.com",
+          "displayName": "pavan ramshetty"
+        }
+      ],
+      "lastRefreshAt": "2026-11-13T12:11:28.246Z",
+      "displayName": "pavan ramshetty"
+    },
+    {
+      "localId": "dgr3waaiW3anG1Oep2rUYj8fKCe8",
+      "lastLoginAt": "1794572603810",
+      "emailVerified": false,
+      "email": "new.user@example.com",
+      "salt": "fakeSaltlEOmHnt74RQvaO2dQAMM",
+      "passwordHash": "fakeHash:salt=fakeSaltlEOmHnt74RQvaO2dQAMM:password=NewUser-test-2026",
+      "passwordUpdatedAt": 1794572603810,
+      "validSince": "1794572603",
+      "createdAt": "1794572603810",
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "new.user@example.com",
+          "federatedId": "new.user@example.com",
+          "rawId": "new.user@example.com",
+          "displayName": "New User"
+        }
+      ],
+      "lastRefreshAt": "2026-11-13T12:23:23.812Z",
+      "displayName": "New User"
+    }
+  ]
+}

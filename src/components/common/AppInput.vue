@@ -22,6 +22,8 @@ const props = defineProps({
   autocomplete: { type: String, default: 'off' },
   required: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
+  /** Focus this field when its dialog/page opens */
+  autofocus: { type: Boolean, default: false },
 })
 
 const id = useId()
@@ -60,6 +62,7 @@ const describedBy = computed(
         :autocomplete="autocomplete"
         :required="required"
         :disabled="disabled"
+        :autofocus="autofocus"
         :aria-invalid="error ? 'true' : undefined"
         :aria-describedby="describedBy"
         :class="[

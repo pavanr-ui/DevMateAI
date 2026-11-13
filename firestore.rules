@@ -55,12 +55,60 @@ service cloud.firestore {
         && data.updatedAt == request.time;
     }
 
+    // ---------- users/{uid}/projects/{id}: user-created workspaces ----------
+    function projectFields() {
+      return ['name', 'description', 'techStack', 'createdAt', 'updatedAt'];
+    }
+
+    function validProjectContent(data) {
+      return data.name is string && data.name.size() >= 1 && data.name.size() <= 80
+        && data.description is string && data.description.size() <= 500
+        // Rules can't loop over list items; the client limits each tag to 30 chars.
+        && data.techStack is list && data.techStack.size() <= 10;
+    }
+
+    function validNewProject() {
+      let data = incoming();
+      return data.keys().hasOnly(projectFields())
+        && data.keys().hasAll(projectFields())
+        && validProjectContent(data)
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+
+    function validProjectUpdate() {
+      let data = incoming();
+      return data.keys().hasOnly(projectFields())
+        && data.diff(resource.data).affectedKeys()
+             .hasOnly(['name', 'description', 'techStack', 'updatedAt'])  // createdAt locked
+        && validProjectContent(data)
+        && data.updatedAt == request.time;
+    }
+
     match /users/{uid} {
       allow get: if isOwner(uid);
       allow list: if false;                          // nobody can list all users
       allow create: if isOwner(uid) && validNewProfile();
       allow update: if isOwner(uid) && validProfileUpdate();
       allow delete: if false;                        // account deletion: backend only (Phase 8)
+
+      match /projects/{projectId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && validNewProject();
+        allow update: if isOwner(uid) && validProjectUpdate();
+        allow delete: if isOwner(uid);
+      }
+
+      // Written ONLY by Cloud Functions (Admin SDK bypasses rules), so users
+      // can read their history and usage but can never fake or erase it.
+      match /activity/{activityId} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+      match /usage/{dayKey} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
     }
 
     // Everything else stays locked until a feature opens it.

@@ -7,6 +7,7 @@ import {
   Bug,
   Component,
   FolderGit2,
+  FolderKanban,
   GraduationCap,
   History,
   House,
@@ -84,6 +85,13 @@ export const historyItem = {
   description: 'Search, rename and revisit past conversations.',
   phase: 8,
 }
+export const projectsItem = {
+  name: 'projects',
+  path: 'projects',
+  label: 'Projects',
+  icon: FolderKanban,
+  description: 'Workspaces that give the AI context about what you build.',
+}
 export const settingsItem = {
   name: 'settings',
   path: 'settings',
@@ -95,7 +103,7 @@ export const settingsItem = {
 export const sidebarSections = [
   { label: null, items: [dashboardItem] },
   { label: 'AI Tools', items: tools },
-  { label: 'Workspace', items: [historyItem] },
+  { label: 'Workspace', items: [projectsItem, historyItem] },
 ]
 
 /** Mobile bottom tabs: max 5, the rest live on the Tools page */

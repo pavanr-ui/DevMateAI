@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { createAuthGuard } from './guards'
-import { dashboardItem, historyItem, settingsItem, tools } from './navigation'
+import { dashboardItem, historyItem, projectsItem, settingsItem, tools } from './navigation'
 
 // Lazy-loaded pages: each page's code downloads only when first visited.
 const ComingSoonPage = () => import('@/pages/ComingSoonPage.vue')
@@ -54,6 +54,12 @@ const routes = [
         name: 'tools',
         component: () => import('@/pages/ToolsPage.vue'),
         meta: { title: 'AI Tools' },
+      },
+      {
+        path: projectsItem.path,
+        name: projectsItem.name,
+        component: () => import('@/pages/projects/ProjectsPage.vue'),
+        meta: { title: projectsItem.label },
       },
       {
         path: settingsItem.path,

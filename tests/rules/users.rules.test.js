@@ -54,7 +54,7 @@ async function seedAlice() {
 
 beforeAll(async () => {
   env = await initializeTestEnvironment({
-    projectId: 'demo-devmate-ai',
+    projectId: 'demo-devmate-rules-test',
     firestore: { rules: readFileSync('firestore.rules', 'utf8'), host: '127.0.0.1', port: 8080 },
   })
 })
