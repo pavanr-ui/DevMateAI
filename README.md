@@ -8,8 +8,25 @@ Runs on desktop web, mobile web, Android and iOS (Capacitor, added in Phase 9).
 
 ## Requirements
 
-- Node.js **22.12+** (project uses 22.23.3, see `.nvmrc`): `nvm use 22.23.3`
+- Node.js **22.12+** (project uses 22.23.3, see `.nvmrc`): `nvm use 22.23.3`.
+  This must be your **active** Node before `npm run emulators`, because the Functions
+  emulator runs the backend with the `node` on your PATH.
 - Java 21 (for the Firebase emulators and Android builds)
+
+## Gemini API key (AI features)
+
+Without a key, the local emulator answers with a **mock AI** response, so the whole
+app works for free. For real answers:
+
+1. Create a key at [Google AI Studio](https://aistudio.google.com/apikey).
+2. Create the file `functions/.secret.local` (git-ignored) containing one line:
+   `GEMINI_API_KEY=<your key>`
+3. Restart the emulators.
+
+Never put the key in `.env.local`, in frontend code, or in chat messages. In production
+it is stored with `firebase functions:secrets:set GEMINI_API_KEY` (Phase 10).
+AI settings (model, daily limit 50/user, message size) live in
+[`functions/src/config.js`](functions/src/config.js).
 
 ## Getting started
 

@@ -21,6 +21,7 @@
 
 @import 'tailwindcss';
 @import './tokens.css';
+@import './markdown.css';
 
 /* Tailwind's `dark:` variant follows the same class Ionic uses, so a single
    class on <html> switches both systems together. */

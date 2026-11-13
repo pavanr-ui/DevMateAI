@@ -7,11 +7,21 @@ import { dashboardItem, historyItem, projectsItem, settingsItem, tools } from '.
 // Lazy-loaded pages: each page's code downloads only when first visited.
 const ComingSoonPage = () => import('@/pages/ComingSoonPage.vue')
 
+/** Real pages for modules that are built. Everything else is a placeholder. */
+const builtModules = {
+  assistant: {
+    // The open chat lives in ?c=<id> (not the path) so Ionic keeps ONE page
+    // instance instead of creating a new one per conversation.
+    path: 'assistant',
+    component: () => import('@/pages/assistant/AssistantPage.vue'),
+  },
+}
+
 /** Modules not built yet show a "coming in Phase N" placeholder. */
-const placeholderRoutes = [...tools, historyItem].map((item) => ({
-  path: item.path,
+const moduleRoutes = [...tools, historyItem].map((item) => ({
+  path: builtModules[item.name]?.path ?? item.path,
   name: item.name,
-  component: ComingSoonPage,
+  component: builtModules[item.name]?.component ?? ComingSoonPage,
   meta: { title: item.label, nav: item },
 }))
 
@@ -67,7 +77,7 @@ const routes = [
         component: () => import('@/pages/settings/SettingsPage.vue'),
         meta: { title: settingsItem.label },
       },
-      ...placeholderRoutes,
+      ...moduleRoutes,
     ],
   },
 

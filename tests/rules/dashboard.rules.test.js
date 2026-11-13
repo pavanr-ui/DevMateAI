@@ -86,24 +86,27 @@ describe('projects', () => {
   })
 })
 
-describe.each(['activity', 'usage'])('%s (backend-written)', (sub) => {
-  const path = (owner) => `users/${owner}/${sub}/2026-11-13`
+describe.each(['activity', 'usage', 'conversations', 'conversations/c1/messages'])(
+  '%s (backend-written)',
+  (sub) => {
+    const path = (owner) => `users/${owner}/${sub}/2026-11-13`
 
-  it('can be read by its owner', async () => {
-    await seed(path(ALICE), { requests: 3 })
-    await assertSucceeds(getDoc(doc(db(ALICE), path(ALICE))))
-    await assertSucceeds(getDocs(collection(db(ALICE), 'users', ALICE, sub)))
-  })
+    it('can be read by its owner', async () => {
+      await seed(path(ALICE), { requests: 3 })
+      await assertSucceeds(getDoc(doc(db(ALICE), path(ALICE))))
+      await assertSucceeds(getDocs(collection(db(ALICE), 'users', ALICE, sub)))
+    })
 
-  it('cannot be read by other users', async () => {
-    await seed(path(ALICE), { requests: 3 })
-    await assertFails(getDoc(doc(db(BOB), path(ALICE))))
-  })
+    it('cannot be read by other users', async () => {
+      await seed(path(ALICE), { requests: 3 })
+      await assertFails(getDoc(doc(db(BOB), path(ALICE))))
+    })
 
-  it('cannot be written by the client, even by its owner', async () => {
-    await assertFails(setDoc(doc(db(ALICE), path(ALICE)), { requests: 999 }))
-    await seed(path(ALICE), { requests: 3 })
-    await assertFails(updateDoc(doc(db(ALICE), path(ALICE)), { requests: 0 }))
-    await assertFails(deleteDoc(doc(db(ALICE), path(ALICE))))
-  })
-})
+    it('cannot be written by the client, even by its owner', async () => {
+      await assertFails(setDoc(doc(db(ALICE), path(ALICE)), { requests: 999 }))
+      await seed(path(ALICE), { requests: 3 })
+      await assertFails(updateDoc(doc(db(ALICE), path(ALICE)), { requests: 0 }))
+      await assertFails(deleteDoc(doc(db(ALICE), path(ALICE))))
+    })
+  },
+)

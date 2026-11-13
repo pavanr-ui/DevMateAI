@@ -2,6 +2,7 @@
 /**
  * ActivityList - recent AI actions (written by the backend in Phase 4+).
  */
+import { RouterLink } from 'vue-router'
 import { Sparkles } from '@lucide/vue'
 import { tools } from '@/router/navigation'
 import { formatRelativeTime, toDate } from '@/utils/dates'
@@ -11,6 +12,14 @@ defineProps({
 })
 
 const toolByName = Object.fromEntries(tools.map((t) => [t.name, t]))
+
+/** Activity that points at a saved chat opens it; others aren't links (yet). */
+function linkFor(item) {
+  if (item.module === 'assistant' && item.targetId) {
+    return { name: 'assistant', query: { c: item.targetId } }
+  }
+  return null
+}
 </script>
 
 <template>
@@ -27,7 +36,14 @@ const toolByName = Object.fromEntries(tools.map((t) => [t.name, t]))
         <component :is="toolByName[item.module]?.icon ?? Sparkles" :size="16" />
       </span>
       <div class="min-w-0 flex-1">
-        <p class="truncate text-sm font-medium text-fg">{{ item.title }}</p>
+        <RouterLink
+          v-if="linkFor(item)"
+          :to="linkFor(item)"
+          class="block truncate text-sm font-medium text-fg hover:text-primary hover:underline"
+        >
+          {{ item.title }}
+        </RouterLink>
+        <p v-else class="truncate text-sm font-medium text-fg">{{ item.title }}</p>
         <p class="text-xs text-subtle">
           {{ toolByName[item.module]?.label ?? 'AI' }} ·
           <time :datetime="toDate(item.createdAt)?.toISOString()">

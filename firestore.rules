@@ -109,6 +109,18 @@ service cloud.firestore {
         allow read: if isOwner(uid);
         allow write: if false;
       }
+
+      // AI chats: the aiChat function saves every message, so the stored
+      // history is exactly what the AI saw. Rename/delete arrive in Phase 8.
+      match /conversations/{conversationId} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+
+        match /messages/{messageId} {
+          allow read: if isOwner(uid);
+          allow write: if false;
+        }
+      }
     }
 
     // Everything else stays locked until a feature opens it.

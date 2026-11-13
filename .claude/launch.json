@@ -6,6 +6,15 @@
       "runtimeExecutable": "C:\\Users\\ramsh\\AppData\\Roaming\\nvm\\v22.23.3\\node.exe",
       "runtimeArgs": ["node_modules/vite/bin/vite.js", "--port", "5173", "--strictPort"],
       "port": 5173
+    },
+    {
+      "name": "firebase-emulators-test",
+      "runtimeExecutable": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "runtimeArgs": [
+        "-c",
+        "export PATH=\"/c/Users/ramsh/AppData/Roaming/nvm/v22.23.3:$PATH\" && node node_modules/firebase-tools/lib/bin/firebase.js emulators:start --project demo-devmate-ai"
+      ],
+      "port": 4000
     }
   ]
 }
