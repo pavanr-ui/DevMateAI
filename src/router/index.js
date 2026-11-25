@@ -15,6 +15,9 @@ const builtModules = {
     path: 'assistant',
     component: () => import('@/pages/assistant/AssistantPage.vue'),
   },
+  // Saved results also use ?c=<id>.
+  reviewer: { component: () => import('@/pages/reviewer/ReviewerPage.vue') },
+  'bug-fixer': { component: () => import('@/pages/bug-fixer/BugFixerPage.vue') },
 }
 
 /** Modules not built yet show a "coming in Phase N" placeholder. */

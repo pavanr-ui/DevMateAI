@@ -7,6 +7,7 @@
  */
 import { computed, nextTick, ref, watch } from 'vue'
 import { ArrowUp, Square } from '@lucide/vue'
+import { CODE_LANGUAGES } from '@/utils/codeLanguages'
 
 const model = defineModel({ type: String, default: '' })
 const settings = defineModel('settings', { type: Object, required: true })
@@ -28,26 +29,10 @@ const modes = [
   { value: 'optimize', label: 'Optimize' },
 ]
 
-const languages = [
-  ['auto', 'Any language'],
-  ['javascript', 'JavaScript'],
-  ['typescript', 'TypeScript'],
-  ['vue', 'Vue 3'],
-  ['html', 'HTML'],
-  ['css', 'CSS'],
-  ['json', 'JSON'],
-  ['python', 'Python'],
-  ['java', 'Java'],
-  ['kotlin', 'Kotlin'],
-  ['swift', 'Swift'],
-  ['csharp', 'C#'],
-  ['cpp', 'C++'],
-  ['go', 'Go'],
-  ['rust', 'Rust'],
-  ['php', 'PHP'],
-  ['sql', 'SQL'],
-  ['bash', 'Bash'],
-]
+// Same list as the Reviewer / Bug Fixer; "Auto-detect" reads better as "Any language" in chat.
+const languages = CODE_LANGUAGES.map(([value, label]) =>
+  value === 'auto' ? [value, 'Any language'] : [value, label],
+)
 
 const placeholders = {
   chat: 'Ask anything about code…',

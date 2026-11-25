@@ -17,3 +17,5 @@ export const healthCheck = onCall(() => ({
 }))
 
 export { aiChat } from './ai/chat.js'
+
+export { aiFixBug, aiReview } from './ai/tools.js'

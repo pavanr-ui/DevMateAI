@@ -7,6 +7,7 @@
  * Mock mode can NEVER run in production (FUNCTIONS_EMULATOR is unset there).
  */
 import { GoogleGenAI } from '@google/genai'
+import { z } from 'zod'
 import { defineSecret } from 'firebase-functions/params'
 import { AI_CONFIG } from '../config.js'
 import { errors } from '../utils/errors.js'
@@ -37,13 +38,20 @@ export function isMockMode() {
  * @param {Array<{role: 'user'|'model', text: string}>} opts.messages oldest first
  * @param {AbortSignal} [opts.signal] stops generation when the user disconnects
  */
-export async function* streamReply({ systemInstruction, messages, signal, model }) {
+export async function* streamReply({
+  systemInstruction,
+  messages,
+  signal,
+  model,
+  responseJsonSchema,
+  mock = mockStream,
+}) {
   const modelId = AI_CONFIG.allowedModels.includes(model) ? model : AI_CONFIG.defaultModel
 
   const start = (abortSignal) =>
     isMockMode()
-      ? mockStream(messages.at(-1)?.text ?? '', abortSignal)
-      : geminiStream({ systemInstruction, messages, modelId, abortSignal })
+      ? mock(messages.at(-1)?.text ?? '', abortSignal)
+      : geminiStream({ systemInstruction, messages, modelId, abortSignal, responseJsonSchema })
 
   try {
     yield* withFirstChunkTimeout(start, {
@@ -57,7 +65,13 @@ export async function* streamReply({ systemInstruction, messages, signal, model 
   }
 }
 
-async function* geminiStream({ systemInstruction, messages, modelId, abortSignal }) {
+async function* geminiStream({
+  systemInstruction,
+  messages,
+  modelId,
+  abortSignal,
+  responseJsonSchema,
+}) {
   const ai = getClient()
   if (!ai) throw errors.aiUnavailable() // production without a key: misconfiguration
 
@@ -72,6 +86,10 @@ async function* geminiStream({ systemInstruction, messages, modelId, abortSignal
       temperature: AI_CONFIG.temperature,
       maxOutputTokens: AI_CONFIG.maxOutputTokens,
       abortSignal,
+      // Structured output: Gemini must reply with JSON matching this schema.
+      ...(responseJsonSchema
+        ? { responseMimeType: 'application/json', responseJsonSchema, temperature: 0.2 }
+        : {}),
     },
   })
 
@@ -105,6 +123,67 @@ async function* geminiStream({ systemInstruction, messages, modelId, abortSignal
     throw errors.aiBlocked()
   }
   yield { done: true, usage, finishReason, model: modelId }
+}
+
+/**
+ * Asks Gemini for JSON matching `resultSchema` (a zod schema) and returns the
+ * validated object. Uses the streaming path internally so the same stall
+ * protection applies; `onProgress(chars)` reports how much has arrived.
+ */
+export async function generateJson({
+  systemInstruction,
+  userText,
+  resultSchema,
+  signal,
+  mockResult,
+  onProgress,
+}) {
+  const jsonSchema = toGeminiSchema(resultSchema)
+  const mock = async function* (_prompt, abortSignal) {
+    await sleep(900)
+    if (abortSignal?.aborted) return
+    const text = JSON.stringify(mockResult())
+    yield { text }
+    yield {
+      done: true,
+      usage: { tokensIn: 0, tokensOut: Math.ceil(text.length / 4) },
+      model: 'mock',
+    }
+  }
+
+  let text = ''
+  let done = null
+  for await (const part of streamReply({
+    systemInstruction,
+    messages: [{ role: 'user', text: userText }],
+    signal,
+    responseJsonSchema: jsonSchema,
+    mock,
+  })) {
+    if (part.done) done = part
+    else {
+      text += part.text
+      onProgress?.(text.length)
+    }
+  }
+  if (!done) return null // stopped by the user
+
+  let parsed
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    throw errors.aiBadOutput()
+  }
+  const result = resultSchema.safeParse(parsed)
+  if (!result.success) throw errors.aiBadOutput()
+  return { result: result.data, usage: done.usage, model: done.model }
+}
+
+/** zod -> JSON Schema in the subset Gemini accepts. */
+export function toGeminiSchema(zodSchema) {
+  const schema = z.toJSONSchema(zodSchema, { target: 'draft-2020-12' })
+  delete schema.$schema
+  return schema
 }
 
 // ---------------------------------------------------------------------------

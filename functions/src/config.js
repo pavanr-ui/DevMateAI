@@ -12,6 +12,8 @@ export const AI_CONFIG = {
 
   /** Max characters in one user message (~3k tokens). */
   maxMessageChars: 12000,
+  /** Max characters of code for the Reviewer / Bug Fixer (~5k tokens). */
+  maxCodeChars: 20000,
   /** How many previous messages are sent to Gemini as context. */
   historyMessages: 20,
   maxOutputTokens: 8192,

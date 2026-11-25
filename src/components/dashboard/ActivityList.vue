@@ -13,10 +13,12 @@ defineProps({
 
 const toolByName = Object.fromEntries(tools.map((t) => [t.name, t]))
 
-/** Activity that points at a saved chat opens it; others aren't links (yet). */
+/** Modules whose pages can open a saved item via ?c=<id>. */
+const LINKABLE = new Set(['assistant', 'reviewer', 'bug-fixer'])
+
 function linkFor(item) {
-  if (item.module === 'assistant' && item.targetId) {
-    return { name: 'assistant', query: { c: item.targetId } }
+  if (LINKABLE.has(item.module) && item.targetId) {
+    return { name: item.module, query: { c: item.targetId } }
   }
   return null
 }

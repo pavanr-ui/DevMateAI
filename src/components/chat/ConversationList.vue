@@ -11,6 +11,8 @@ defineProps({
   conversations: { type: Array, required: true },
   status: { type: String, required: true },
   activeId: { type: String, default: null },
+  newLabel: { type: String, default: 'New chat' },
+  emptyText: { type: String, default: 'Your chats will appear here.' },
 })
 defineEmits(['select', 'new', 'retry'])
 </script>
@@ -18,7 +20,9 @@ defineEmits(['select', 'new', 'retry'])
 <template>
   <div class="flex h-full flex-col">
     <div class="p-3">
-      <AppButton block variant="secondary" :icon="Plus" @click="$emit('new')">New chat</AppButton>
+      <AppButton block variant="secondary" :icon="Plus" @click="$emit('new')">
+        {{ newLabel }}
+      </AppButton>
     </div>
 
     <div class="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
@@ -40,7 +44,7 @@ defineEmits(['select', 'new', 'retry'])
       </p>
 
       <p v-else-if="!conversations.length" class="px-2 py-4 text-sm text-muted">
-        Your chats will appear here.
+        {{ emptyText }}
       </p>
 
       <ul v-else class="flex flex-col gap-0.5">
