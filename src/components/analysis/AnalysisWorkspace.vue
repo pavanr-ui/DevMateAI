@@ -103,7 +103,11 @@ const kb = computed(() => (props.store.progressChars / 1024).toFixed(1))
           </AppButton>
         </div>
 
-        <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+        <!-- minmax(0, …) lets columns shrink below their content, so a long
+             line of code scrolls inside its block instead of widening the page -->
+        <div
+          class="grid grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]"
+        >
           <!-- Form -->
           <AppCard as="section" aria-label="Input">
             <slot name="form" />

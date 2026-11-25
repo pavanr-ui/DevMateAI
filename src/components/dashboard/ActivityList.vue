@@ -14,7 +14,7 @@ defineProps({
 const toolByName = Object.fromEntries(tools.map((t) => [t.name, t]))
 
 /** Modules whose pages can open a saved item via ?c=<id>. */
-const LINKABLE = new Set(['assistant', 'reviewer', 'bug-fixer'])
+const LINKABLE = new Set(['assistant', 'reviewer', 'bug-fixer', 'component-generator', 'learn'])
 
 function linkFor(item) {
   if (LINKABLE.has(item.module) && item.targetId) {

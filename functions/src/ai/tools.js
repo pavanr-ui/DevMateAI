@@ -1,11 +1,18 @@
 /**
- * The Code Reviewer and Bug Fixer, built on the shared analysis engine.
+ * Code Reviewer, Bug Fixer and Vue Component Generator, built on the shared analysis engine.
  */
 import { createAnalysisFunction } from './analysis.js'
-import { buildBugFixPrompt, buildReviewPrompt } from './prompts/analysis.js'
+import {
+  buildBugFixPrompt,
+  buildComponentInput,
+  buildComponentPrompt,
+  buildReviewPrompt,
+} from './prompts/analysis.js'
 import {
   bugFixRequestSchema,
   bugFixResultSchema,
+  componentRequestSchema,
+  componentResultSchema,
   reviewRequestSchema,
   reviewResultSchema,
 } from '../schemas/analysis.js'
@@ -91,5 +98,75 @@ export const aiFixBug = createAnalysisFunction({
     changes: [{ line: 1, description: 'Example change on line 1' }],
     prevention: ['Enable the no-floating-promises lint rule'],
     fixedCode: `// Mock fixed code\n${input.code}`,
+  }),
+})
+
+export const aiGenerateComponent = createAnalysisFunction({
+  module: 'component-generator',
+  inputSchema: componentRequestSchema,
+  resultSchema: componentResultSchema,
+  buildPrompt: (input, project) => buildComponentPrompt({ ...input, project }),
+  buildUserText: buildComponentInput,
+  userContent: (input) => input.description,
+  makeTitle: (input, result) =>
+    `${result.kind === 'composable' ? 'Composable' : 'Component'}: ${shorten(result.name, 50)}`,
+  extraUserFields: (input) => ({
+    kind: input.kind,
+    name: input.name || null,
+    styling: input.styling,
+  }),
+  mockResult: (input) => ({
+    name: input.name || (input.kind === 'composable' ? 'useExample' : 'ExampleCard'),
+    kind: input.kind,
+    summary: '🧪 Mock component (no Gemini key configured). This shows the result layout.',
+    files: [
+      {
+        filename: input.kind === 'composable' ? 'useExample.js' : 'ExampleCard.vue',
+        language: input.kind === 'composable' ? 'javascript' : 'vue',
+        code:
+          input.kind === 'composable'
+            ? [
+                "import { ref } from 'vue'",
+                '',
+                'export function useExample() {',
+                '  const count = ref(0)',
+                '  return { count }',
+                '}',
+              ].join('\n')
+            : [
+                '<script setup>',
+                'defineProps({ title: { type: String, required: true } })',
+                "defineEmits(['select'])",
+                '</script>',
+                '',
+                '<template>',
+                '  <button type="button" @click="$emit(\'select\')">{{ title }}</button>',
+                '</template>',
+              ].join('\n'),
+      },
+    ],
+    props:
+      input.kind === 'composable'
+        ? []
+        : [
+            {
+              name: 'title',
+              type: 'String',
+              required: true,
+              default: null,
+              description: 'Text shown on the card.',
+            },
+          ],
+    emits:
+      input.kind === 'composable'
+        ? []
+        : [{ name: 'select', payload: null, description: 'Fired when the card is clicked.' }],
+    slots: [],
+    usage:
+      input.kind === 'composable'
+        ? 'const { count } = useExample()'
+        : '<ExampleCard title="Hello" @select="onSelect" />',
+    explanation: 'A real explanation appears here when a Gemini key is configured.',
+    accessibility: ['Uses a native <button>, so it works with the keyboard.'],
   }),
 })

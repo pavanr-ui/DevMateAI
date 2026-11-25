@@ -13,6 +13,8 @@ const props = defineProps({
   lang: { type: String, default: '' },
   /** True while the AI is still writing this block (highlight less often). */
   streaming: { type: Boolean, default: false },
+  /** Optional label instead of the language, e.g. a filename */
+  title: { type: String, default: '' },
 })
 
 const html = ref('')
@@ -46,11 +48,11 @@ onBeforeUnmount(() => clearTimeout(timer))
     <figcaption
       class="flex h-9 items-center justify-between border-b border-line px-3 text-xs text-muted"
     >
-      <span class="font-mono">{{ lang || 'text' }}</span>
+      <span class="font-mono">{{ title || lang || 'text' }}</span>
       <button
         type="button"
         class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-medium hover:bg-surface hover:text-fg"
-        :aria-label="copied ? 'Copied' : `Copy ${lang || ''} code`"
+        :aria-label="copied ? 'Copied' : `Copy ${title || lang || ''} code`"
         @click="copy(code)"
       >
         <Check v-if="copied" :size="14" class="text-success" aria-hidden="true" />

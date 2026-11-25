@@ -34,6 +34,8 @@ async function loadProject(uid, projectId) {
  * @param {(input, result) => string} tool.makeTitle     history title
  * @param {(input) => object} tool.mockResult            emulator-only fake result
  * @param {(input) => object} [tool.extraUserFields]     extra fields saved on the user message
+ * @param {(input) => string} [tool.buildUserText]  prompt text (default: code with error/expected blocks)
+ * @param {(input) => string} [tool.userContent]    what to save as the user message (default: input.code)
  */
 export function createAnalysisFunction(tool) {
   return onCall(
@@ -58,7 +60,7 @@ export function createAnalysisFunction(tool) {
       try {
         output = await generateJson({
           systemInstruction: tool.buildPrompt(input, project),
-          userText: buildAnalysisInput(input),
+          userText: (tool.buildUserText ?? buildAnalysisInput)(input),
           resultSchema: tool.resultSchema,
           signal: response?.signal,
           mockResult: () => tool.mockResult(input),
@@ -96,7 +98,10 @@ export function createAnalysisFunction(tool) {
       batch.set(conversationRef, {
         title,
         module: tool.module,
-        language: input.language === 'auto' ? (result.language ?? 'auto') : input.language,
+        language:
+          input.language && input.language !== 'auto'
+            ? input.language
+            : (result.language ?? 'auto'),
         projectId: input.projectId ?? null,
         lastMessagePreview: (result.summary ?? '').slice(0, 140),
         ...(typeof result.score === 'number' ? { score: result.score } : {}),
@@ -106,8 +111,8 @@ export function createAnalysisFunction(tool) {
       })
       batch.set(messagesCol(uid, conversationRef.id).doc(), {
         role: 'user',
-        content: input.code,
-        language: input.language,
+        content: tool.userContent?.(input) ?? input.code,
+        language: input.language ?? null,
         ...(tool.extraUserFields?.(input) ?? {}),
         createdAt: askedAt,
       })
@@ -133,7 +138,7 @@ export function createAnalysisFunction(tool) {
       logEvent(`${tool.module}.done`, {
         uid,
         conversationId: conversationRef.id,
-        codeChars: input.code.length,
+        inputChars: (tool.userContent?.(input) ?? input.code).length,
         ...usage,
         ms: Date.now() - startedAt,
       })

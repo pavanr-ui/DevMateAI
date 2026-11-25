@@ -1,6 +1,8 @@
 <script setup>
 /**
  * Message box + options (mode, code language, answer language, project).
+ * Other chat tools pass their own `modes` / `placeholders` and replace the
+ * pickers through the #options slot.
  *
  * Keyboard: Enter sends, Shift+Enter adds a new line (on touch devices
  * Enter adds a new line; use the send button).
@@ -16,30 +18,34 @@ const props = defineProps({
   sending: { type: Boolean, default: false },
   projects: { type: Array, default: () => [] },
   maxLength: { type: Number, default: 12000 },
+  modes: {
+    type: Array,
+    default: () => [
+      { value: 'chat', label: 'Chat' },
+      { value: 'generate', label: 'Generate' },
+      { value: 'explain', label: 'Explain' },
+      { value: 'optimize', label: 'Optimize' },
+    ],
+  },
+  placeholders: {
+    type: Object,
+    default: () => ({
+      chat: 'Ask anything about code…',
+      generate: 'Describe the code you need…',
+      explain: 'Paste code or name a concept…',
+      optimize: 'Paste code to improve…',
+    }),
+  },
 })
 const emit = defineEmits(['send', 'stop'])
 
 const textarea = ref(null)
 const isTouch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
 
-const modes = [
-  { value: 'chat', label: 'Chat' },
-  { value: 'generate', label: 'Generate' },
-  { value: 'explain', label: 'Explain' },
-  { value: 'optimize', label: 'Optimize' },
-]
-
 // Same list as the Reviewer / Bug Fixer; "Auto-detect" reads better as "Any language" in chat.
 const languages = CODE_LANGUAGES.map(([value, label]) =>
   value === 'auto' ? [value, 'Any language'] : [value, label],
 )
-
-const placeholders = {
-  chat: 'Ask anything about code…',
-  generate: 'Describe the code you need…',
-  explain: 'Paste code or name a concept…',
-  optimize: 'Paste code to improve…',
-}
 
 const tooLong = computed(() => model.value.length > props.maxLength)
 const nearLimit = computed(() => model.value.length > props.maxLength * 0.8)
@@ -81,7 +87,7 @@ const selectClass =
       ref="textarea"
       v-model="model"
       rows="1"
-      :placeholder="placeholders[settings.mode]"
+      :placeholder="placeholders[settings.mode] ?? placeholders.chat"
       :aria-invalid="tooLong || undefined"
       aria-describedby="chat-input-help"
       class="block max-h-60 w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-[0.9375rem] text-fg placeholder:text-subtle focus:outline-none"
@@ -93,6 +99,7 @@ const selectClass =
       <div class="no-scrollbar -my-1 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1">
         <!-- Mode -->
         <div
+          v-if="modes.length > 1"
           role="radiogroup"
           aria-label="Mode"
           class="flex shrink-0 rounded-lg bg-surface-muted p-0.5"
@@ -115,12 +122,27 @@ const selectClass =
           </button>
         </div>
 
-        <label class="sr-only" for="chat-language">Code language</label>
-        <select id="chat-language" v-model="settings.language" :class="selectClass">
-          <option v-for="[value, label] in languages" :key="value" :value="value">
-            {{ label }}
-          </option>
-        </select>
+        <!-- Tool-specific pickers (default: code language + project) -->
+        <slot name="options" :settings="settings" :select-class="selectClass">
+          <label class="sr-only" for="chat-language">Code language</label>
+          <select id="chat-language" v-model="settings.language" :class="selectClass">
+            <option v-for="[value, label] in languages" :key="value" :value="value">
+              {{ label }}
+            </option>
+          </select>
+
+          <template v-if="projects.length">
+            <label class="sr-only" for="chat-project">Project context</label>
+            <select
+              id="chat-project"
+              v-model="settings.projectId"
+              :class="[selectClass, 'max-w-40']"
+            >
+              <option :value="null">No project</option>
+              <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
+            </select>
+          </template>
+        </slot>
 
         <label class="sr-only" for="chat-response-language">Answer language</label>
         <select
@@ -131,14 +153,6 @@ const selectClass =
           <option value="en">English</option>
           <option value="te">తెలుగు (Telugu)</option>
         </select>
-
-        <template v-if="projects.length">
-          <label class="sr-only" for="chat-project">Project context</label>
-          <select id="chat-project" v-model="settings.projectId" :class="[selectClass, 'max-w-40']">
-            <option :value="null">No project</option>
-            <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
-          </select>
-        </template>
       </div>
 
       <div class="flex shrink-0 items-center gap-2">

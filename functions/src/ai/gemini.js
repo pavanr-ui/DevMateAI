@@ -44,6 +44,7 @@ export async function* streamReply({
   signal,
   model,
   responseJsonSchema,
+  maxOutputTokens = AI_CONFIG.maxOutputTokens,
   mock = mockStream,
 }) {
   const modelId = AI_CONFIG.allowedModels.includes(model) ? model : AI_CONFIG.defaultModel
@@ -51,7 +52,14 @@ export async function* streamReply({
   const start = (abortSignal) =>
     isMockMode()
       ? mock(messages.at(-1)?.text ?? '', abortSignal)
-      : geminiStream({ systemInstruction, messages, modelId, abortSignal, responseJsonSchema })
+      : geminiStream({
+          systemInstruction,
+          messages,
+          modelId,
+          abortSignal,
+          responseJsonSchema,
+          maxOutputTokens,
+        })
 
   try {
     yield* withFirstChunkTimeout(start, {
@@ -71,6 +79,7 @@ async function* geminiStream({
   modelId,
   abortSignal,
   responseJsonSchema,
+  maxOutputTokens,
 }) {
   const ai = getClient()
   if (!ai) throw errors.aiUnavailable() // production without a key: misconfiguration
@@ -84,7 +93,7 @@ async function* geminiStream({
     config: {
       systemInstruction,
       temperature: AI_CONFIG.temperature,
-      maxOutputTokens: AI_CONFIG.maxOutputTokens,
+      maxOutputTokens,
       abortSignal,
       // Structured output: Gemini must reply with JSON matching this schema.
       ...(responseJsonSchema
@@ -158,6 +167,7 @@ export async function generateJson({
     messages: [{ role: 'user', text: userText }],
     signal,
     responseJsonSchema: jsonSchema,
+    maxOutputTokens: AI_CONFIG.maxOutputTokensJson,
     mock,
   })) {
     if (part.done) done = part
@@ -172,7 +182,8 @@ export async function generateJson({
   try {
     parsed = JSON.parse(text)
   } catch {
-    throw errors.aiBadOutput()
+    // Cut off by the output limit -> a clear message instead of "unexpected result".
+    throw done.finishReason === 'MAX_TOKENS' ? errors.aiTooLong() : errors.aiBadOutput()
   }
   const result = resultSchema.safeParse(parsed)
   if (!result.success) throw errors.aiBadOutput()

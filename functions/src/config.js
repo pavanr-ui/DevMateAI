@@ -17,6 +17,12 @@ export const AI_CONFIG = {
   /** How many previous messages are sent to Gemini as context. */
   historyMessages: 20,
   maxOutputTokens: 8192,
+  /**
+   * Output budget for structured tools (review, fix, component). Gemini's
+   * "thinking" counts toward this limit, and generated files can be long,
+   * so 8k was too small (a combobox component was cut off mid-JSON).
+   */
+  maxOutputTokensJson: 32768,
   temperature: 0.4,
   /**
    * Give up if the AI hasn't started answering within this time (Gemini

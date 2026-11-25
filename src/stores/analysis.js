@@ -145,3 +145,4 @@ export function createAnalysisStore(module, functionName) {
 
 export const useReviewStore = createAnalysisStore('reviewer', 'aiReview')
 export const useBugFixStore = createAnalysisStore('bug-fixer', 'aiFixBug')
+export const useComponentStore = createAnalysisStore('component-generator', 'aiGenerateComponent')

@@ -16,6 +16,6 @@ export const healthCheck = onCall(() => ({
   time: new Date().toISOString(),
 }))
 
-export { aiChat } from './ai/chat.js'
+export { aiChat, aiLearn } from './ai/chat.js'
 
-export { aiFixBug, aiReview } from './ai/tools.js'
+export { aiFixBug, aiGenerateComponent, aiReview } from './ai/tools.js'

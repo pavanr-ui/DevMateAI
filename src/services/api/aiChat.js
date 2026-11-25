@@ -1,5 +1,5 @@
 /**
- * Calls the aiChat Cloud Function and streams the answer.
+ * Calls a streaming chat Cloud Function (aiChat, aiLearn) and streams the answer.
  *
  * The browser never talks to Gemini directly and never sees the API key:
  * it calls OUR backend function, which checks the user, applies limits and
@@ -8,16 +8,24 @@
 import { httpsCallable } from 'firebase/functions'
 import { functions } from '@/services/firebase'
 
-const aiChatCallable = httpsCallable(functions, 'aiChat', { timeout: 190_000 }) // server limit is 180 s
+const callables = {}
+const getCallable = (name) =>
+  (callables[name] ??= httpsCallable(functions, name, { timeout: 190_000 })) // server limit is 180 s
 
 /**
  * @param {object} input  { conversationId?, message, mode, language, responseLanguage, projectId? }
  * @param {object} handlers  { onMeta({conversationId}), onText(text) }
  * @param {AbortSignal} [signal]  abort to stop generating
+ * @param {string} [functionName]  which chat function to call
  * @returns {Promise<{conversationId, messageId, usage, stopped}>}
  */
-export async function streamAiChat(input, { onMeta, onText } = {}, signal) {
-  const { stream, data } = await aiChatCallable.stream(input, { signal })
+export async function streamAiChat(
+  input,
+  { onMeta, onText } = {},
+  signal,
+  functionName = 'aiChat',
+) {
+  const { stream, data } = await getCallable(functionName).stream(input, { signal })
   for await (const chunk of stream) {
     if (chunk?.type === 'meta') onMeta?.(chunk)
     else if (chunk?.type === 'text') onText?.(chunk.text)

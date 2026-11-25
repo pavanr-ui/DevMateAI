@@ -8,6 +8,15 @@
       "port": 5173
     },
     {
+      "name": "firebase-emulators",
+      "runtimeExecutable": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "runtimeArgs": [
+        "-c",
+        "export PATH=\"/c/Users/ramsh/AppData/Roaming/nvm/v22.23.3:/e/AI/DevMate AI/node_modules/.bin:$PATH\" && node scripts/emulators.js"
+      ],
+      "port": 4000
+    },
+    {
       "name": "firebase-emulators-test",
       "runtimeExecutable": "C:\\Program Files\\Git\\bin\\bash.exe",
       "runtimeArgs": [
